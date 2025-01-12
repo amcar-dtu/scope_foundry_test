@@ -1,0 +1,6 @@
+.DS_Store
+**.cpython*.pyc
+.h5
+log/*
+data/*
+ScopeFoundry/*
