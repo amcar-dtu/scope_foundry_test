@@ -1,7 +1,7 @@
 ScopeFoundry 2 Basic Tutorial
 ==================================
 
-Roughly the content of the ScopeFoundry basic tutorial.
+Roughly the content of the ScopeFoundry basic and data_browser tutorial.
 
 <http://www.scopefoundry.org>
 
@@ -16,7 +16,7 @@ Benedikt Ursprung
 
 ## Credits
 
-Parts taken from E. Barnards [HW_virtual_function_gen](https://github.com/ScopeFoundry/HW_virtual_function_gen) which was the basis of prev. tutorials. 
+- Parts taken from E. Barnards [HW_virtual_function_gen](https://github.com/ScopeFoundry/HW_virtual_function_gen) which was the basis of prev. tutorials 
 
 Requirements
 ------------
