@@ -6,7 +6,6 @@ setup(
     description="Roughly the content of the ScopeFoundry basic tutorial.",
     # Author details
     author="Benedikt Ursprung",
-    author_email="esbarnard@lbl.gov",
     # Choose your license
     license="BSD",
     # package_dir={'ScopeFoundryHW.virtual_function_gen': '.'},

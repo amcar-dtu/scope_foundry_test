@@ -1,13 +1,18 @@
 from ScopeFoundry.hardware import HardwareComponent
 
 
-class NumberGenHw(HardwareComponent):
+class NumberGenHW(HardwareComponent):
 
     name = "number_gen"
 
     def setup(self):
         s = self.settings
-        s.New("port", str, initial="COM1", description="has no effect for this dummy device")
+        s.New(
+            "port",
+            str,
+            initial="COM1",
+            description="has no effect for this dummy device",
+        )
         s.New("amplitude", float, initial=1.0, ro=False)
         s.New("rand_data", float, initial=0, ro=True)
         s.New("sine_data", float, initial=0, ro=True)

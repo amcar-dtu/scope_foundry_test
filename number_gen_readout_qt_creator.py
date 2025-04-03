@@ -3,7 +3,7 @@ import pyqtgraph as pg
 
 from ScopeFoundry.helper_funcs import sibling_path, load_qt_ui_file
 
-from number_gen_readout import NumberGenReadout
+from ScopeFoundryHW.random_number_gen.number_gen_readout import NumberGenReadout
 
 
 class NumberGenReadoutQtCreator(NumberGenReadout):

@@ -20,13 +20,6 @@
       <string>Settings</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="0">
-       <widget class="QPushButton" name="interrupt_pushButton">
-        <property name="text">
-         <string>Interrupt</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
        <widget class="QPushButton" name="start_pushButton">
         <property name="text">
