@@ -23,6 +23,9 @@ class MyDataBrowser(DataBrowser):
         from viewers.images import MatplotlibImreadView
         self.add_view(MatplotlibImreadView(self))
 
+        from viewers.random_number_gen import RandomNumberGenView
+        self.add_view(RandomNumberGenView(self))
+
 
 if __name__ == "__main__":
     app = MyDataBrowser(sys.argv)

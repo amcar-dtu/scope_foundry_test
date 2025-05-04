@@ -1,5 +1,5 @@
 # viewers/images.py
-import os
+from pathlib import Path
 
 import numpy as np
 import pyqtgraph as pg
@@ -18,12 +18,11 @@ class MatplotlibImreadView(DataBrowserView):
         # self.ui should be a QWidget of some sort, here we use a pyqtgraph ImageView
         self.ui = self.imview = pg.ImageView()
 
-    def is_file_supported(self, fname):
+    def is_file_supported(self, fname) -> bool:
         # Tells the DataBrowser whether this plug-in would likely be able
         # to read the given file name
         # here we are using the file extension to make a guess
-        _, ext = os.path.splitext(fname)
-        return ext.lower() in [".png", ".tif", ".tiff", ".jpg"]
+        return Path(fname).suffix.lower() in (".png", ".tif", ".tiff", ".jpg")
 
     def on_change_data_filename(self, fname):
         #  A new file has been selected by the user, load and display it
@@ -34,7 +33,5 @@ class MatplotlibImreadView(DataBrowserView):
             # When a failure to load occurs, zero out image
             # and show error message
             self.imview.setImage(np.zeros((10, 10)))
-            self.databrowser.ui.statusbar.showMessage(
-                "failed to load %s:\n%s" % (fname, err)
-            )
+            self.databrowser.ui.statusbar.showMessage(f"failed to load {fname}:\n{err}")
             raise (err)
