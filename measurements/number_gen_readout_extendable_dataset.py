@@ -131,3 +131,7 @@ class NumberGenReadoutExtendableDataset(Measurement):
     # def close_h5_file(self):
     #     if hasattr(self, "h5_file") and self.h5_file.id is not None:
     #         self.h5_file.close()
+
+    # def save_h5(self, data):
+    #     self.open_new_h5_file(data)
+    #     self.close_h5_file()

@@ -52,10 +52,12 @@ class NumberGenReadoutSimple(Measurement):
                 break
 
         if self.settings["save_h5"]:
-            # saves data, closes file, and sets self.dataset_metadata
+            # saves data, closes file,
             self.save_h5(data=self.data)
 
-            # Save the data to a PNG file with the same name
+            # ScopeFoundry 2.1 and later
+            # self.save_h5 also sets self.dataset_metadata
+            # which allows to save data in other formats
             import matplotlib.pyplot as plt
 
             plt.figure()
@@ -84,3 +86,23 @@ class NumberGenReadoutSimple(Measurement):
 
     def update_display(self):
         self.plot_lines["y"].setData(self.data["y"])
+
+    # ---------------------------------------------------------------------------
+    # # UNCOMMENT IF YOU HAVE SCOPEFOUNDRY 2.0 OR EARLIER
+    # ---------------------------------------------------------------------------
+
+    # def open_new_h5_file(self):
+    #     self.close_h5_file()
+
+    #     self.h5_file = h5_io.h5_base_file(self.app, measurement=self)
+    #     self.h5_meas_group = h5_io.h5_create_measurement_group(self, self.h5_file)
+
+    #     return self.h5_meas_group
+
+    # def close_h5_file(self):
+    #     if hasattr(self, "h5_file") and self.h5_file.id is not None:
+    #         self.h5_file.close()
+
+    # def save_h5(self, data):
+    #     self.open_new_h5_file(data)
+    #     self.close_h5_file()
