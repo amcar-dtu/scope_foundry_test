@@ -37,6 +37,8 @@ To include ScopeFoundry and all of the packages it needs to run, activate the en
 Download and install ScopeFoundry and its dependencies:
 
 	pip install pyqt6 qtconsole matplotlib scopefoundry
+
+> **⚠️ WARNING:** One must use `pip` here because of `pyqt6` being badly packaged (it breakes both `conda` and `poetry`).
 ​
 ## Using Miniconda
 With that in mind, if you want the other user to have no knowledge of your default install path, you can remove the prefix line with grep before writing to environment.yml.
