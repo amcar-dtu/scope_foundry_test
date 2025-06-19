@@ -18,6 +18,10 @@ class FancyApp(BaseMicroscopeApp):
 
         self.add_hardware(NumberGenHW(self))
 
+        from ScopeFoundryHW.andor_camera import AndorCCDHW
+
+        self.add_hardware(AndorCCDHW(self))
+
         # Add measurement
         from measurements.number_gen_readout_simple import NumberGenReadoutSimple
 
@@ -32,6 +36,10 @@ class FancyApp(BaseMicroscopeApp):
         )
 
         self.add_measurement(NumberGenReadoutExtendableDataset(self))
+
+        from measurements.andor_ccd_readout import AndorCCDReadoutMeasure
+
+        self.add_measurement(AndorCCDReadoutMeasure)
 
 
 if __name__ == "__main__":
