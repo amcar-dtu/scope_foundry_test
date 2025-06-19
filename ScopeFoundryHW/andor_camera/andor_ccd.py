@@ -150,7 +150,7 @@ class AndorCCDHW(HardwareComponent):
         if self.settings['has_em_ccd']:
             self.em_gain.hardware_read_func = self.ccd_dev.get_EMCCD_gain
             self.em_gain.hardware_set_func = self.ccd_dev.set_EMCCD_gain
-            self.em_gain.write_to_hardware()
+            # self.em_gain.write_to_hardware()
         else:
             self.em_gain.change_readonly(True)
         
