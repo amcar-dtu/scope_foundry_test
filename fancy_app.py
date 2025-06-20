@@ -14,28 +14,14 @@ class FancyApp(BaseMicroscopeApp):
         and measurements to the app.
         """
         # Add hardware
-        # from ScopeFoundryHW.random_number_gen import NumberGenHW
-
-        # self.add_hardware(NumberGenHW(self))
 
         from ScopeFoundryHW.andor_camera import AndorCCDHW
+        from ScopeFoundryHW.andor_spec import AndorShamrockSpecHW
 
         self.add_hardware(AndorCCDHW(self))
+        self.add_hardware(AndorShamrockSpecHW(self))
 
         # Add measurement
-        # from measurements.number_gen_readout_simple import NumberGenReadoutSimple
-
-        # self.add_measurement(NumberGenReadoutSimple(self))
-
-        # from measurements.number_gen_readout_qt_creator import NumberGenReadoutQtCreator
-
-        # self.add_measurement(NumberGenReadoutQtCreator(self))
-
-        # from measurements.number_gen_readout_extendable_dataset import (
-        #     NumberGenReadoutExtendableDataset,
-        # )
-
-        # self.add_measurement(NumberGenReadoutExtendableDataset(self))
 
         from measurements.andor_ccd_readout import AndorCCDReadoutMeasure
 
