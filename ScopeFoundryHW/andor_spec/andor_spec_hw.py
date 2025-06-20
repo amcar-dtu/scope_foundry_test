@@ -24,16 +24,16 @@ class AndorShamrockSpecHW(HardwareComponent):
                                 )
 
         self.settings.New('turret', dtype=int, ro=True)
-        self.settings.New('grating_id', dtype=int, initial=1, choices=(1,2,3,4,5,6))
+        self.settings.New('grating_id', dtype=int, initial=1, choices=(1,2,3))
         self.settings.New('grating_name', dtype=str, ro=True)
         
-        self.settings.New('input_flipper', dtype=str, choices=('direct', 'side'))
+        # self.settings.New('input_flipper', dtype=str, choices=('direct', 'side'))
         self.settings.New('output_flipper', dtype=str, choices=('direct', 'side'))
         
-        self.settings.New('focus_mirror', dtype=int, unit='steps')
+        # self.settings.New('focus_mirror', dtype=int, unit='steps')
         
         self.settings.New('slit_input_side', dtype=float, unit='um')
-        #self.settings.New('slit_output_side', dtype=float, unit='um')
+        self.settings.New('slit_output_side', dtype=float, unit='um')
         
         self.settings.New('grating_calib_side_in', dtype=float, 
                           array=True, initial=[[300e6,0,0,256,0,  (1/150.)*1e6, 16e3,0]]*4)
@@ -51,7 +51,7 @@ class AndorShamrockSpecHW(HardwareComponent):
         self.settings.New('grating_offset_1', dtype=int)
         self.settings.New('grating_offset_2', dtype=int)
         self.settings.New('grating_offset_3', dtype=int)
-        self.settings.New('grating_offset_4', dtype=int)
+        # self.settings.New('grating_offset_4', dtype=int)
 
         #calibration promt
         #self.add_operation('calibration', self.load_ui_calibration)
@@ -78,19 +78,19 @@ class AndorShamrockSpecHW(HardwareComponent):
         
         S.grating_id.add_listener(self.on_grating_id_change)
         
-        S.input_flipper.connect_to_hardware(
-            read_func = lambda flipper='input': spec.get_flipper_mirror(flipper), 
-            write_func = lambda port, flipper='input': spec.set_flipper_mirror(flipper, port), 
-            )
+        # S.input_flipper.connect_to_hardware(
+        #     read_func = lambda flipper='input': spec.get_flipper_mirror(flipper), 
+        #     write_func = lambda port, flipper='input': spec.set_flipper_mirror(flipper, port), 
+        #     )
         
         S.output_flipper.connect_to_hardware(
             read_func = lambda flipper='output': spec.get_flipper_mirror(flipper), 
             write_func = lambda port, flipper='output': spec.set_flipper_mirror(flipper, port), 
             )
         
-        S.focus_mirror.connect_to_hardware(
-            read_func = spec.get_focus_mirror_position,
-            write_func = spec.set_focus_mirror_position_abs)
+        # S.focus_mirror.connect_to_hardware(
+        #     read_func = spec.get_focus_mirror_position,
+        #     write_func = spec.set_focus_mirror_position_abs)
         
         S.slit_input_side.connect_to_hardware(
             read_func = lambda slit='input_side': spec.get_slit_width(slit),
@@ -133,10 +133,10 @@ class AndorShamrockSpecHW(HardwareComponent):
             read_func = lambda: spec.get_grating_offset(3),
             write_func = lambda x: spec.set_grating_offset(3,x)
         )
-        S.grating_offset_4.connect_to_hardware(
-            read_func = lambda: spec.get_grating_offset(4),
-            write_func = lambda x: spec.set_grating_offset(4,x)
-        )
+        # S.grating_offset_4.connect_to_hardware(
+        #     read_func = lambda: spec.get_grating_offset(4),
+        #     write_func = lambda x: spec.set_grating_offset(4,x)
+        # )
 
 
         self.read_from_hardware()
@@ -154,7 +154,7 @@ class AndorShamrockSpecHW(HardwareComponent):
         
     def on_grating_id_change(self):
         self.settings['grating_name'] = self.spec.gratings[self.settings['grating_id']]
-        self.settings.focus_mirror.read_from_hardware()
+        # self.settings.focus_mirror.read_from_hardware()
 
 
     # def load_ui_calibration(self):

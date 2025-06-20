@@ -122,11 +122,11 @@ class AndorShamrockSpec(object):
             _err(lib.ShamrockAutoSlitIsPresent(dev_id, num, byref(x)))
             self.slit_present[name] = bool(x.value)
             
-        # Focus mirror
-        x = c_int()
-        ## Gets maximum possible focus position in steps
-        _err(lib.ShamrockGetFocusMirrorMaxSteps(dev_id, byref(x)))
-        self.focus_mirror_max_steps = x.value
+        # # Focus mirror
+        # x = c_int()
+        # ## Gets maximum possible focus position in steps
+        # _err(lib.ShamrockGetFocusMirrorMaxSteps(dev_id, byref(x)))
+        # self.focus_mirror_max_steps = x.value
         
         # Flipper mirrors
         self.flipper_mirror_ids = dict(
