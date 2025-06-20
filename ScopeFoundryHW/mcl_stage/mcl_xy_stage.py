@@ -64,9 +64,9 @@ class MclXYStageHW(HardwareComponent):
                                                              dtype=float)        
         
         # TODO: check if this is needed
-        # connect logged quantities together
-        self.x_target.updated_value[()].connect(self.read_pos)
-        self.y_target.updated_value[()].connect(self.read_pos)
+        # # connect logged quantities together
+        # self.x_target.updated_value[()].connect(self.read_pos)
+        # self.y_target.updated_value[()].connect(self.read_pos)
         
         # Actions
         self.add_operation('GOTO_Center_XY', self.go_to_center_xy)

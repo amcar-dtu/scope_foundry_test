@@ -15,11 +15,8 @@ print("loading DLL:", repr(madlib_path))
 madlib = cdll.LoadLibrary(madlib_path)
 
 # set return types of certain function
-madlib.MCL_SingleReadZ.restype = c_double
 madlib.MCL_SingleReadN.restype = c_double
-madlib.MCL_MonitorZ.restype = c_double
 madlib.MCL_MonitorN.restype = c_double
-madlib.MCL_ReadEncoderZ.restype = c_double
 
 madlib.MCL_GetCalibration.restype = c_double
 #more...

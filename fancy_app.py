@@ -18,10 +18,12 @@ class FancyApp(BaseMicroscopeApp):
         from ScopeFoundryHW.andor_camera import AndorCCDHW
         from ScopeFoundryHW.andor_spec import AndorShamrockSpecHW
         from ScopeFoundryHW.mcl_stage import MclXYZStageHW
+        from ScopeFoundryHW.mcl_stage import MclXYStageHW
 
         self.add_hardware(AndorCCDHW(self))
         self.add_hardware(AndorShamrockSpecHW(self))
         self.add_hardware(MclXYZStageHW(self))
+        self.add_hardware(MclXYStageHW(self))
 
         # Add measurement
 
