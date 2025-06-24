@@ -1,13 +1,14 @@
 from ScopeFoundry import HardwareComponent
-from ScopeFoundry.scanning import BaseRaster2DSlowScanV2
+from ScopeFoundry.scanning import BaseRaster2DSlowScan
 
 
-class Example2DSlowScanMeasure(BaseRaster2DSlowScanV2):
+class Example2DSlowScanMeasure(BaseRaster2DSlowScan):
 
     name = "example_2d_scan"
 
     def scan_specific_setup(self):
-        self.detector: HardwareComponent = self.app.hardware["noiser_200"]
+        self.detector: HardwareComponent = self.app.hardware["andor_ccd"]
+        self.stage: HardwareComponent = self.app.hardware["mcl_xy_stage"]
 
     def pre_scan_setup(self):
         if self.settings["save_h5"]:

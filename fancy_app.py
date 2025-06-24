@@ -28,8 +28,10 @@ class FancyApp(BaseMicroscopeApp):
         # Add measurement
 
         from measurements.andor_ccd_readout import AndorCCDReadoutMeasure
+        from measurements.example_2d_slowscan_measure import Example2DSlowScanMeasure
 
         self.add_measurement(AndorCCDReadoutMeasure)
+        self.add_measurement(Example2DSlowScanMeasure(self))
 
 
 if __name__ == "__main__":
