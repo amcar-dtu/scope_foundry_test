@@ -18,10 +18,10 @@ print("loading DLL:", repr(madlib_path))
 madlib = cdll.LoadLibrary(madlib_path)
 
 # set return types of certain function
-madlib.MCL_SingleReadN.restype = c_double
-madlib.MCL_MonitorN.restype = c_double
+# madlib.MCL_SingleReadN.restype = c_double
+# madlib.MCL_MonitorN.restype = c_double
 
-madlib.MCL_GetCalibration.restype = c_double
+# madlib.MCL_GetCalibration.restype = c_double
 #more...
 MCL_ERROR_CODES = {
    0: "MCL_SUCCESS",
@@ -36,6 +36,8 @@ MCL_ERROR_CODES = {
 }
 
 SLOW_STEP_PERIOD = 0.050  #units are seconds
+
+STEP_SIZE = 0.095 # units are microns, this is the step size of the MCL MicroDrive
 
 class MCLProductInformation(ctypes.Structure):
     _fields_ = [
@@ -87,22 +89,25 @@ class MCLMicroDrive(object):
         if not handle:
             print("MCLMicroDrive failed to grab device handle ", hex(handle))
 
-        self.prodinfo = MCLProductInformation()
-        madlib.MCL_GetProductInfo(byref(self.prodinfo), handle)
-        
-        if self.debug: self.prodinfo.print_info()
+        #self.prodinfo = MCLProductInformation()
+        #madlib.MCL_GetProductInfo(byref(self.prodinfo), handle)
+        #if self.debug: self.prodinfo.print_info()
         
         self.device_serial_number = madlib.MCL_GetSerialNumber(handle)
         if self.debug: print("MCL_GetSerialNumber", self.device_serial_number)
-        
-        self.cal_X = None
-        self.cal_Y = None
-        
+
+
+        #safety for it not to go to too big range, TODO: make adjustable in mcl_xy_stage.py
+        self.min_xposition = -100 # minimum x position in microns
+        self.min_yposition = -100 # minimum y position in microns
+        self.max_xposition = 100 # maximum x position in microns
+        self.max_yposition = 100 # maximum y position in microns
+
         self.num_axes = 0
     
         self.cal = dict()
         for axname, axnum, axbitmap in [('X', 1, 0b001), ('Y', 2, 0b010)]:
-            axvalid = bool(self.prodinfo.axis_bitmap & axbitmap)
+            axvalid = bool(not madlib.MCL_GetAxisInfo(bin(axbitmap), handle))
             if debug: print(axname, axnum, "axbitmap:", bin(axbitmap), "axvalid", axvalid)
             
             if not axvalid:
@@ -111,16 +116,19 @@ class MCLMicroDrive(object):
             
             self.num_axes += 1
             
-            cal = madlib.MCL_GetCalibration(axnum, handle)
+            # cal = madlib.MCL_GetCalibration(axnum, handle)
 
-            setattr(self, 'cal_%s' % axname, cal)
-            self.cal[axnum] = cal
-            if debug: print("cal_%s: %g" % (axname, cal))
+            # setattr(self, 'cal_%s' % axname, cal)
+            # self.cal[axnum] = cal
+            # if debug: print("cal_%s: %g" % (axname, cal))
         
         self.set_max_speed(100)  # default speed for slow movement is 100 microns/second
         #self.get_pos()
         
         self.lock 
+
+        self.velocity = 0.1905  # default velocity, found by trial and error, can be adjusted if needed
+        if self.debug: print("default velocity:", self.velocity)
 
         #positions set to zero upon initialization
         self.x_pos = 0 
@@ -184,13 +192,11 @@ class MCLMicroDrive(object):
 
     def set_pos(self, x=None, y=None):
         if x is not None:
-            assert 0 <= x <= self.cal_X
+            assert self.min_xposition <= x <= self.max_xposition
             self.set_pos_ax(x, 1)
-            self.x_pos  = x  # update internal variable
         if y is not None:
-            assert 0 <= y <= self.cal_Y
+            assert self.min_yposition <= y <= self.max_yposition
             self.set_pos_ax(y, 2)
-            self.y_pos  = y  # update internal variable
         
         #madlib.MCL_DeviceAttached(200, self._handle)
         # MCL_DeviceAttached can be used as a simple wait function. In this case
@@ -201,9 +207,19 @@ class MCLMicroDrive(object):
     def set_pos_ax(self, pos, axis):
         if self.debug: print("set_pos_ax ", pos, axis)
         assert 1 <= axis <= self.num_axes
-        assert 0 <= pos <= self.cal[axis]
-        self.handle_err(madlib.MCL_MDMoveM(axis, c_double(self.max_speed), c_double(pos), self._handle)) #!!!TODO, steps are relative in steps, no micron
-        
+        # assert 0 <= pos <= self.cal[axis]
+
+        rel_steps = int( (pos - self.get_pos_ax(axis)) // STEP_SIZE )  # convert to relative steps, where STEP_SIZE is the step size in microns
+        self.handle_err(madlib.MCL_MDMoveM(axis, c_double(self.velocity), rel_steps, self._handle))
+        self.handle_err(madlib.MCL_MicroDriveWait(self._handle))
+
+        # Update internal variables with current position
+        if self.debug: print("set_pos_ax: setting pos to ", pos, " for axis ", axis, 'relative steps:', rel_steps)
+        if axis == 1:
+            self.x_pos = pos
+        elif axis == 2:
+            self.y_pos = pos
+
     def get_pos_ax(self, axis):
         if self.debug: print("get_pos_ax", axis)
         return self.x_pos if axis == 1 else self.y_pos
@@ -251,8 +267,10 @@ if __name__ == '__main__':
     print("MCL microdrive test")
     
     microdrive = MCLMicroDrive(debug=True)
-    print(microdrive.getCommandedPosition())
+    # print(microdrive.getCommandedPosition())
     #print microdrive.monitorN(0, 1)
+
+    microdrive.set_pos(10, 0)
     
     #for x,y in [ (0,0), (10,10), (30,30), (50,50), (50,25), (50,0)]:
     """for x,y in [ (30,0), (30,10), (30,30), (30,50), (30,25), (30,0)]:
