@@ -1,3 +1,6 @@
+# Adapted from the original Scopefoundry Plugin for MCL NanoDrive
+# Source: https://github.com/ScopeFoundry/HW_mcl_stage.git
+
 from __future__ import division, print_function, absolute_import
 import ctypes
 from ctypes import c_int, c_byte, c_ubyte, c_short, c_double, cdll, pointer, byref
@@ -119,6 +122,10 @@ class MCLMicroDrive(object):
         
         self.lock 
 
+        #positions set to zero upon initialization
+        self.x_pos = 0 
+        self.y_pos = 0
+
     def set_max_speed(self, max_speed):
         '''
         Units are in microns/second
@@ -179,9 +186,11 @@ class MCLMicroDrive(object):
         if x is not None:
             assert 0 <= x <= self.cal_X
             self.set_pos_ax(x, 1)
+            self.x_pos  = x  # update internal variable
         if y is not None:
             assert 0 <= y <= self.cal_Y
             self.set_pos_ax(y, 2)
+            self.y_pos  = y  # update internal variable
         
         #madlib.MCL_DeviceAttached(200, self._handle)
         # MCL_DeviceAttached can be used as a simple wait function. In this case
@@ -193,45 +202,18 @@ class MCLMicroDrive(object):
         if self.debug: print("set_pos_ax ", pos, axis)
         assert 1 <= axis <= self.num_axes
         assert 0 <= pos <= self.cal[axis]
-        self.handle_err(madlib.MCL_SingleWriteN(c_double(pos), axis, self._handle))
+        self.handle_err(madlib.MCL_MDMoveM(axis, c_double(self.max_speed), c_double(pos), self._handle)) #!!!TODO, steps are relative in steps, no micron
         
-    
     def get_pos_ax(self, axis):
-        pos = float(self.singleReadN(axis))
-        if self.debug: print("get_pos_ax", axis, pos)
-        return pos
+        if self.debug: print("get_pos_ax", axis)
+        return self.x_pos if axis == 1 else self.y_pos
     
     def get_pos(self):
-        self.x_pos = self.singleReadN(1)
-        self.y_pos = self.singleReadN(2)
+        self.x_pos = self.get_pos_ax(1)
+        self.y_pos = self.get_pos_ax(2)
             
         return (self.x_pos, self.y_pos)
-    
-    def singleReadN(self, axis):
-        with self.lock:
-            resp = madlib.MCL_SingleReadN(axis, self._handle)
-        if resp < 0 and resp in self.MCL_ERROR_CODES:
-            raise IOError("MCL singleReadN Error: {}".format(self.MCL_ERROR_CODES[resp]))
-            #print('singleReadN', self.MCL_ERROR_CODES[resp])
-        return resp
-    
-    def monitorN(self, pos, axis):
-        with self.lock:
-            resp = madlib.MCL_MonitorN(pos, axis, self._handle)
-        if resp < 0 and resp in self.MCL_ERROR_CODES:
-            #raise IOError(self.MCL_ERROR_CODES[resp])
-            print('monitorN', pos, axis, self.MCL_ERROR_CODES[resp])        
-        return resp
-    
-    def getCommandedPosition(self):
-        xCom = c_double()
-        yCom = c_double()
-        resp = madlib.MCL_GetCommandedPosition(byref(xCom), byref(yCom), self._handle)
-        if resp < 0:
-            #raise IOError(self.MCL_ERROR_CODES[resp])
-            print('getCommandedPosition',  self.MCL_ERROR_CODES[resp])        
-        return xCom.value, yCom.value
-        
+            
     
     def set_pos_ax_slow(self, pos, axis):
         if self.debug: print("set_pos_slow_ax ", pos, axis)
