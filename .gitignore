@@ -5,3 +5,6 @@ log/*
 data/*
 ScopeFoundry/*
 .vscode/*
+
+# Qt Creator autosave files
+*.ui.autosave
