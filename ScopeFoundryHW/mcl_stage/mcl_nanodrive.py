@@ -1,3 +1,6 @@
+# Adapted from the original Scopefoundry Plugin for MCL NanoDrive
+# Source: https://github.com/ScopeFoundry/HW_mcl_stage.git
+
 from __future__ import division, print_function, absolute_import
 import ctypes
 from ctypes import c_int, c_byte, c_ubyte, c_short, c_double, cdll, pointer, byref

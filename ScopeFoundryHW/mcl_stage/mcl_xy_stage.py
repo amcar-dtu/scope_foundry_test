@@ -23,8 +23,8 @@ class MclXYStageHW(HardwareComponent):
         lq_params = dict(  dtype=float, ro=True,
                            initial = -1,
                            spinbox_decimals=3,
-                           vmin=-1,
-                           vmax=300,
+                           vmin=-1e3,
+                           vmax=1e3,
                            si = False,
                            unit='um')
         self.x_position = self.add_logged_quantity("x_position", **lq_params)
@@ -33,8 +33,8 @@ class MclXYStageHW(HardwareComponent):
         lq_params = dict(  dtype=float, ro=False,
                            initial = -1,
                            spinbox_decimals=3,
-                           vmin=-1,
-                           vmax=300,
+                           vmin=-1e3,
+                           vmax=1e3,
                            unit='um')
         self.x_target = self.add_logged_quantity("x_target", **lq_params)
         self.y_target = self.add_logged_quantity("y_target", **lq_params)       
@@ -70,6 +70,7 @@ class MclXYStageHW(HardwareComponent):
         
         # Actions
         self.add_operation('GOTO_Center_XY', self.go_to_center_xy)
+        self.add_operation('Set_Current_Position_As_Zero', self.set_current_position_as_zero)
         
     def on_update_xy_axis_map(self):
         print("on_update_xy_axis_map")
@@ -118,27 +119,32 @@ class MclXYStageHW(HardwareComponent):
         
         # connect logged quantities
         self.x_target.hardware_set_func  = \
-            lambda x: self.microdrive.set_pos_ax_slow(x, self.MCL_AXIS_ID["X"])
+            lambda x: self.microdrive.set_pos_ax(x, self.MCL_AXIS_ID["X"])
         self.y_target.hardware_set_func  = \
-            lambda y: self.microdrive.set_pos_ax_slow(y, self.MCL_AXIS_ID["Y"])
+            lambda y: self.microdrive.set_pos_ax(y, self.MCL_AXIS_ID["Y"])
 
         self.x_position.hardware_read_func = \
             lambda: self.microdrive.get_pos_ax(int(self.MCL_AXIS_ID["X"]))
         self.y_position.hardware_read_func = \
             lambda: self.microdrive.get_pos_ax(int(self.MCL_AXIS_ID["Y"]))
-            
-            
-        self.x_max.hardware_read_func = lambda: self.microdrive.cal[self.MCL_AXIS_ID["X"]]
-        self.y_max.hardware_read_func = lambda: self.microdrive.cal[self.MCL_AXIS_ID["Y"]]
-        
+
+
+        ##TODO: add set functions, note the microdrive does not have a set_min_position_x/y function
+        self.x_max.hardware_read_func = self.microdrive.get_max_position_x
+        self.y_max.hardware_read_func = self.microdrive.get_max_position_y
+        ##TODO: at some point one wants to have also min functions (not present in original code)
+        # self.x_min.hardware_read_func = self.microdrive.get_min_position_x
+        # self.y_min.hardware_read_func = self.microdrive.get_min_position_y
+
         self.move_speed.hardware_read_func = self.microdrive.get_max_speed
         self.move_speed.hardware_set_func =  self.microdrive.set_max_speed
         self.move_speed.write_to_hardware()
         
         self.read_from_hardware()
         
-        self.settings.x_target.change_min_max(0.1, self.x_max.value-0.1)
-        self.settings.y_target.change_min_max(0.1, self.y_max.value-0.1)
+
+        self.settings.x_target.change_min_max(self.microdrive.min_xposition, self.microdrive.max_xposition)
+        self.settings.y_target.change_min_max(self.microdrive.min_yposition, self.microdrive.max_yposition)
         
         self.settings.x_target.update_value(self.settings['x_position'], update_hardware=False)
         self.settings.y_target.update_value(self.settings['y_position'], update_hardware=False)
@@ -175,6 +181,15 @@ class MclXYStageHW(HardwareComponent):
     def go_to_center_xy(self):
         self.settings['x_target'] = self.settings['x_max']*0.5
         self.settings['y_target'] = self.settings['y_max']*0.5
+
+    def set_current_position_as_zero(self):
+        """
+        Set the current position as zero.
+        """
+        
+        # Update the logged quantities
+        self.microdrive.x_pos = 0
+        self.microdrive.y_pos = 0
         
         
     def threaded_update(self):
