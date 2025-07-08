@@ -168,10 +168,10 @@ class AndorShamrockSpecHW(HardwareComponent):
         grating_id = S['grating_id'] - 1
         
         
-        if S['input_flipper'] == 'side':
-            grating_calib_array = S['grating_calib_side_in'][grating_id]
-        if S['input_flipper'] == 'direct':
-            grating_calib_array = S['grating_calib_direct_in'][grating_id] 
+        # if S['input_flipper'] == 'side':
+        grating_calib_array = S['grating_calib_side_in'][grating_id]
+        # if S['input_flipper'] == 'direct':
+        #     grating_calib_array = S['grating_calib_direct_in'][grating_id] 
         f, delta, gamma, n0, offset_adjust, d_grating, x_pixel  = grating_calib_array[0:7]
         curvature = 0
         if len(grating_calib_array) > 7:

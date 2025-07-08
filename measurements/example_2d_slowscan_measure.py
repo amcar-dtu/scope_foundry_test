@@ -50,16 +50,31 @@ class Example2DSlowScanMeasure(BaseRaster2DSlowScan):
     def collect_pixel(self, pixel_num, k, j, i):
         ccd_hw = self.detector
         ccd_dev = ccd_hw.ccd_dev
+
+        width_px = ccd_dev.Nx_ro
+        
         try:
             self.log.info("starting acq")
             ccd_dev.start_acquisition()
 
             while not self.interrupt_measurement_called:
+
                 stat = ccd_hw.settings.ccd_status.read_from_hardware()
                 
                 if stat == 'IDLE':
                     # grab data
                     buffer_ = ccd_hw.get_acquired_data()
+
+
+                    bg = ccd_hw.background
+                    if bg is not None:
+                        if bg.shape == buffer_.shape:
+                            buffer_ = buffer_ - bg
+                        else:
+                            self.log.warning("Background not the correct shape {} != {}".format( self.buffer_.shape, bg.shape))
+                    else:
+                        self.log.warning( "No Background available, raw data shown")
+
                     signal = np.average(buffer_, axis=0)
 
                     break # end the while loop for non-continuous scans
