@@ -122,14 +122,12 @@ class MCLNanoDrive(object):
         self.device_serial_number = madlib.MCL_GetSerialNumber(handle)
         if self.debug: print("MCL_GetSerialNumber", self.device_serial_number)
         
-        self.cal_X = None
-        self.cal_Y = None
         self.cal_Z = None
         
         self.num_axes = 0
     
         self.cal = dict()
-        for axname, axnum, axbitmap in [('X', 1, 0b001), ('Y', 2, 0b010), ('Z', 3, 0b100)]:
+        for axname, axnum, axbitmap in [('Z', 3, 0b100)]:
             axvalid = bool(self.prodinfo.axis_bitmap & axbitmap)
             if debug: print(axname, axnum, "axbitmap:", bin(axbitmap), "axvalid", axvalid)
             
@@ -166,28 +164,28 @@ class MCLNanoDrive(object):
         z -> axis 3
         '''
         
-        x_start, y_start, z_start = self.get_pos()
+        z_start = self.get_pos()
         
-        if x is not None:
-            dx = x - x_start
-        else:
-            dx = 0
-        if y is not None:            
-            dy = y - y_start
-        else:
-            dy = 0
+        # if x is not None:
+        #     dx = x - x_start
+        # else:
+        #     dx = 0
+        # if y is not None:            
+        #     dy = y - y_start
+        # else:
+        #     dy = 0
         if z is not None:
             dz = z-z_start
         else:
             dz = 0
         
         # Compute the amount of time that will be needed to make the movement.
-        dt = np.sqrt(dx**2 + dy**2 + dz**2)/self.max_speed
+        dt = np.abs(dz)/self.max_speed
             
         # Assume dt is in ms; divide the movement into SLOW_STEP_PERIOD chunks
         steps = int( np.ceil(dt/SLOW_STEP_PERIOD))
-        x_step = dx/steps
-        y_step = dy/steps
+        # x_step = dx/steps
+        # y_step = dy/steps
         z_step = dz/steps
         
 
@@ -195,9 +193,9 @@ class MCLNanoDrive(object):
         for i in range(1,steps+1):
             t1 = time.time()
             if z is not None:
-                self.set_pos(x_start+i*x_step, y_start+i*y_step, z_start+i*z_step)
+                self.set_pos(z_start+i*z_step)
             else:
-                self.set_pos(x_start+i*x_step, y_start+i*y_step, None)
+                self.set_pos(None)
             t2 = time.time()
             
             if (t2-t1) < SLOW_STEP_PERIOD:
@@ -220,12 +218,6 @@ class MCLNanoDrive(object):
         #TODO
 
     def set_pos(self, x=None, y=None, z=None):
-        if x is not None:
-            assert 0 <= x <= self.cal_X
-            self.set_pos_ax(x, 1)
-        if y is not None:
-            assert 0 <= y <= self.cal_Y
-            self.set_pos_ax(y, 2)
         if z is not None:
             assert 0 <= z <= self.cal_Z
             self.set_pos_ax(z, 3)
@@ -238,8 +230,7 @@ class MCLNanoDrive(object):
         
     def set_pos_ax(self, pos, axis):
         if self.debug: print("set_pos_ax ", pos, axis)
-        assert 1 <= axis <= self.num_axes
-        assert 0 <= pos <= self.cal[axis]
+        assert axis== 3, "Only Z axis is supported in MCLNanoDrive"
         self.handle_err(madlib.MCL_SingleWriteN(c_double(pos), axis, self._handle))
         
     
@@ -249,14 +240,8 @@ class MCLNanoDrive(object):
         return pos
     
     def get_pos(self):
-        self.x_pos = self.singleReadN(1)
-        self.y_pos = self.singleReadN(2)
-        if self.num_axes > 2:
-            self.z_pos = self.singleReadN(3)
-        else:
-            self.z_pos = -1
-            
-        return (self.x_pos, self.y_pos, self.z_pos)
+        self.z_pos = self.singleReadN(3)            
+        return (self.z_pos)
     
     def singleReadN(self, axis):
         with self.lock:
@@ -280,15 +265,15 @@ class MCLNanoDrive(object):
         zCom = c_double()
         resp = madlib.MCL_GetCommandedPosition(byref(xCom), byref(yCom), byref(zCom), self._handle)
         if resp < 0:
-            #raise IOError(self.MCL_ERROR_CODES[resp])
+            # raise IOError(self.MCL_ERROR_CODES[resp])
             print('getCommandedPosition',  self.MCL_ERROR_CODES[resp])        
-        return xCom.value, yCom.value, zCom.value
+        return zCom.value
         
     
     def set_pos_ax_slow(self, pos, axis):
         if self.debug: print("set_pos_slow_ax ", pos, axis)
-        assert 1 <= axis <= self.num_axes
-        #assert 0 <= pos <= self.cal[axis]
+        assert axis == 3, "Only Z axis is supported in MCLNanoDrive"
+        
         pos = np.clip(pos, 0, self.cal[axis])
         
         start = self.get_pos_ax(axis)
