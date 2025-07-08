@@ -194,6 +194,19 @@ class MCLMicroDrive(object):
         elif axis == 2:
             self.y_pos = pos
 
+    def move_relative_steps(self, rel_steps, axis):
+        if self.debug: print("move_relative_steps ", rel_steps, axis)
+        assert 1 <= axis <= self.num_axes
+
+        self.handle_err(madlib.MCL_MDMoveM(axis, c_double(self.velocity), rel_steps, self._handle))
+        self.handle_err(madlib.MCL_MicroDriveWait(self._handle))
+
+        distance = rel_steps * STEP_SIZE  # convert steps to microns
+        if axis == 1:
+            self.x_pos = self.x_pos + distance
+        elif axis == 2:
+            self.y_pos = self.y_pos + distance
+
     def get_pos_ax(self, axis):
         if self.debug: print("get_pos_ax", axis)
         return self.x_pos if axis == 1 else self.y_pos

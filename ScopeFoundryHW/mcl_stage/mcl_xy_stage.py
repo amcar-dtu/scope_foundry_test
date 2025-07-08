@@ -179,8 +179,8 @@ class MclXYStageHW(HardwareComponent):
     
     
     def go_to_center_xy(self):
-        self.settings['x_target'] = self.settings['x_max']*0.5
-        self.settings['y_target'] = self.settings['y_max']*0.5
+        self.settings['x_target'] = self.settings['x_max']*0.0
+        self.settings['y_target'] = self.settings['y_max']*0.0
 
     def set_current_position_as_zero(self):
         """
@@ -190,6 +190,20 @@ class MclXYStageHW(HardwareComponent):
         # Update the logged quantities
         self.microdrive.x_pos = 0
         self.microdrive.y_pos = 0
+
+    def backlash_correction(self, axis, steps=300):
+        """
+        Perform backlash correction for the specified axis.
+        The correction assumes first a negative step, then a positive step of 30 micron be taken
+        """
+        if axis == 'X':
+            self.microdrive.move_relative_steps(-steps, self.MCL_AXIS_ID['X']) #TODO change function steps
+            self.microdrive.move_relative_steps(steps, self.MCL_AXIS_ID['X'])
+        elif axis == 'Y':
+            self.microdrive.move_relative_steps(-steps, self.MCL_AXIS_ID['Y'])
+            self.microdrive.move_relative_steps(steps, self.MCL_AXIS_ID['Y'])
+        else:
+            raise ValueError("Invalid axis specified for backlash correction.")
         
         
     def threaded_update(self):
